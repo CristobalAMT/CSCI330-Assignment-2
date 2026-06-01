@@ -19,6 +19,11 @@ class Assign2 {
    static class StockData {	   
 	   // To Do: 
 	   // Create this class which should contain the information  (date, open price, high price, low price, close price) for a particular ticker
+      String date;
+      double openPrice;
+      double highPrice;
+      double lowPrice;
+      double closePrice;
    }
    
    static Connection conn;
@@ -100,7 +105,7 @@ class Assign2 {
    }
 
    static Deque<StockData> getStockData(String ticker, String start, String end) throws SQLException{	  
-      ResultSet stockData = null;
+      ResultSet stockInfo = null;
       // create and execute preparedStatement when a date range is given
       if(start != null && end != null) {
          PreparedStatement stockStatement = conn.prepareStatement(
@@ -112,7 +117,7 @@ class Assign2 {
          stockStatement.setString(1, ticker);
          stockStatement.setString(2, start);
          stockStatement.setString(3, end);
-         stockData = stockStatement.executeQuery();
+         stockInfo = stockStatement.executeQuery();
       }
       // create and execute preparedStatement for no date range
       else {
@@ -122,39 +127,57 @@ class Assign2 {
             " order by TransDate DESC"
          );
          stockStatement.setString(1, ticker);
-         stockData = stockStatement.executeQuery();
+         stockInfo = stockStatement.executeQuery();
       }
 
       Deque<StockData> result = new ArrayDeque<>();
       
+      // totalDivisor normalizes the stock data by adjusting for stock splits
+      double totalDivisor = 1;
+      stockInfo.next();
 
-	  // To Do: 
-	  // Loop through all the dates of that company (descending order)
-			// Find a split if there is any (2:1, 3:1, 3:2) and adjust the split accordingly
-			// Include the adjusted data to the result (which is a Deque); You can use addFirst method for that purpose
-      
-      // prevDayData holds 3 important pieces of data for calculating stock splits: 
-      //    the trading day, the opening price, and the closing price
-      String[] prevDayData = new String[3];
-      stockData.next();
+      // Add first stock to deque
+      StockData firstStock = new StockData();
+      firstStock.date = stockInfo.getString(2).trim();
+      firstStock.openPrice = Double.parseDouble(stockInfo.getString(3));
+      firstStock.highPrice = Double.parseDouble(stockInfo.getString(4).trim());
+      firstStock.lowPrice = Double.parseDouble(stockInfo.getString(5).trim());
+      firstStock.closePrice = Double.parseDouble(stockInfo.getString(6).trim());
+      result.add(firstStock);
 
-      // for testing purposes
-      System.out.println("Ticker: " + stockData.getString(1).trim());
-      System.out.println("TransDate: " + stockData.getString(2).trim());
-      System.out.println("OpenPrice: " + stockData.getString(3).trim());
-      System.out.println("HighPrice: " + stockData.getString(4).trim());
-      System.out.println("LowPrice: " + stockData.getString(5).trim());
-      System.out.println("ClosePrice: " + stockData.getString(6).trim());
-      System.out.println("Volume: " + stockData.getString(7).trim());
-      System.out.println("AdjustedClose: " + stockData.getString(8).trim());
+      // while there is more data, add stock to deque while adjusting for splits
+      // step 2.4/2.5
+      while(stockInfo.next()) {
+         // check for stock splits 
 
-      prevDayData[0] = stockData.getString(2).trim(); // 2 is TransDate
-      prevDayData[1] = stockData.getString(3).trim(); // 3 is OpenPrice
-      prevDayData[2] = stockData.getString(6).trim(); // 6 is ClosePrice
-
-      // while(stockData.next()) {
-
-      // }
+         double currClose = Double.parseDouble(stockInfo.getString(6).trim());
+         double nextOpen = result.getLast().openPrice * totalDivisor;
+         String currDate = stockInfo.getString(2).trim();
+         // in case of 2:1 stock split
+         if(Math.abs((currClose/nextOpen) - 2) < 0.2) {
+            System.out.println("2:1 split on " + currDate + " " + currClose + " --> " + nextOpen);
+            totalDivisor = totalDivisor*2;
+         }
+         // in case of 3:1 stock split
+         else if(Math.abs((currClose/nextOpen) - 3) < 0.3) {
+            System.out.println("3:1 split on " + currDate + " " + currClose + " --> " + nextOpen);
+            totalDivisor = totalDivisor*3;
+         }
+         // in case of 3:2 stock split
+         else if(Math.abs((currClose/nextOpen) - 1.5) < 0.15) {
+            System.out.println("3:2 split on " + currDate + " " + currClose + " --> " + nextOpen);
+            totalDivisor = totalDivisor*1.5;
+         }
+         
+         // add current stock data to deque
+         StockData currStock = new StockData();
+         currStock.date = currDate;
+         currStock.openPrice = Double.parseDouble(stockInfo.getString(3).trim()) / totalDivisor;
+         currStock.highPrice = Double.parseDouble(stockInfo.getString(4).trim()) / totalDivisor;
+         currStock.lowPrice = Double.parseDouble(stockInfo.getString(5).trim()) / totalDivisor;
+         currStock.closePrice = currClose / totalDivisor;
+         result.addLast(currStock);
+      }
 	         
       return result;
    }
