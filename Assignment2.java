@@ -14,7 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-class Assign2Skeleton {
+class Assign2 {
    
    static class StockData {	   
 	   // To Do: 
