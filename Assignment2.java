@@ -57,11 +57,11 @@ class Assign2 {
                   startdate = params[1];
                   enddate = params[2];
                }               
-               // Step 2.3 and 2.4: Get pricevolume data 
+               // Step 2.3-2.5: Get pricevolume data and adjust for splits
                Deque<StockData> data = getStockData(ticker, startdate, enddate);
                System.out.println();
                System.out.println("Executing investment strategy");
-               // Step 2.5-2.10: execute investment strategy 
+               // Step 2.6-2.10: execute investment strategy 
                doStrategy(ticker, data);
             } 
             
@@ -91,7 +91,7 @@ class Assign2 {
       ResultSet name = nameStatement.executeQuery(); // results from executing statement
       // if we got a name, then print the company name corresponding to the given ticker and return true.
       if(name.next()) {
-         System.out.print(name.getString(1));
+         System.out.println(name.getString(1));
          return true;
       }
       // otherwise, say we didn't get a result and return false.
@@ -100,10 +100,11 @@ class Assign2 {
    }
 
    static Deque<StockData> getStockData(String ticker, String start, String end) throws SQLException{	  
+      ResultSet stockData = null;
       // create and execute preparedStatement when a date range is given
       if(start != null && end != null) {
          PreparedStatement stockStatement = conn.prepareStatement(
-            "select * from priceVolume" +
+            "select * from pricevolume" +
             " where Ticker = ? AND" +
             " TransDate BETWEEN ? AND ?" +
             " order by TransDate DESC"
@@ -111,25 +112,49 @@ class Assign2 {
          stockStatement.setString(1, ticker);
          stockStatement.setString(2, start);
          stockStatement.setString(3, end);
-         ResultSet stockData = stockStatement.executeQuery();
+         stockData = stockStatement.executeQuery();
       }
       // create and execute preparedStatement for no date range
       else {
          PreparedStatement stockStatement = conn.prepareStatement(
-            "select * from priceVolume" +
+            "select * from pricevolume" +
             " where Ticker = ?" +
             " order by TransDate DESC"
          );
          stockStatement.setString(1, ticker);
-         ResultSet stockData = stockStatement.executeQuery();
+         stockData = stockStatement.executeQuery();
       }
 
       Deque<StockData> result = new ArrayDeque<>();
+      
 
 	  // To Do: 
 	  // Loop through all the dates of that company (descending order)
 			// Find a split if there is any (2:1, 3:1, 3:2) and adjust the split accordingly
 			// Include the adjusted data to the result (which is a Deque); You can use addFirst method for that purpose
+      
+      // prevDayData holds 3 important pieces of data for calculating stock splits: 
+      //    the trading day, the opening price, and the closing price
+      String[] prevDayData = new String[3];
+      stockData.next();
+
+      // for testing purposes
+      System.out.println("Ticker: " + stockData.getString(1).trim());
+      System.out.println("TransDate: " + stockData.getString(2).trim());
+      System.out.println("OpenPrice: " + stockData.getString(3).trim());
+      System.out.println("HighPrice: " + stockData.getString(4).trim());
+      System.out.println("LowPrice: " + stockData.getString(5).trim());
+      System.out.println("ClosePrice: " + stockData.getString(6).trim());
+      System.out.println("Volume: " + stockData.getString(7).trim());
+      System.out.println("AdjustedClose: " + stockData.getString(8).trim());
+
+      prevDayData[0] = stockData.getString(2).trim(); // 2 is TransDate
+      prevDayData[1] = stockData.getString(3).trim(); // 3 is OpenPrice
+      prevDayData[2] = stockData.getString(6).trim(); // 6 is ClosePrice
+
+      // while(stockData.next()) {
+
+      // }
 	         
       return result;
    }
