@@ -32,6 +32,7 @@ class Assign2Skeleton {
       
       Properties connectprops = new Properties();
       connectprops.load(new FileInputStream(paramsFile));
+      // step 1: connect to the database
       try {
          Class.forName("com.mysql.cj.jdbc.Driver");
          String dburl = connectprops.getProperty("dburl");
@@ -41,20 +42,24 @@ class Assign2Skeleton {
          
          Scanner in = new Scanner(System.in);
          System.out.print(prompt);
+         // Step 2.1: request ticker symbol and start/end dates from System.in
          String input = in.nextLine().trim();
          
          while (input.length() > 0) {
             String[] params = input.split("\\s+");
             String ticker = params[0];
             String startdate = null, enddate = null;
+            // Step 2.2: Get full company name from table and print to console.
             if (getName(ticker)) {
                if (params.length >= 3) {
                   startdate = params[1];
                   enddate = params[2];
                }               
+               // Step 2.3: Get pricevolume data 
                Deque<StockData> data = getStockData(ticker, startdate, enddate);
                System.out.println();
                System.out.println("Executing investment strategy");
+               // Step 2.5-2.10: execute investment strategy 
                doStrategy(ticker, data);
             } 
             
@@ -72,6 +77,10 @@ class Assign2Skeleton {
       }
    }
    
+   // gets the name of the company using the given ticker from the company table, prints it, and returns true.
+   // if the given ticker doesn't correspond to a company, it returns false.
+   // if true, the main loop begins obtaining data for the company and executes the investment strategy.
+   // if false, the main loop simply loops again.
    static boolean getName(String ticker) throws SQLException {
 	  // To Do: 
 	  // Execute the first query and print the company name of the ticker user provided (e.g., INTC to Intel Corp.) 
