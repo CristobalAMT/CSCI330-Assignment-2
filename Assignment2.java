@@ -57,7 +57,7 @@ class Assign2 {
                   startdate = params[1];
                   enddate = params[2];
                }               
-               // Step 2.3: Get pricevolume data 
+               // Step 2.3 and 2.4: Get pricevolume data 
                Deque<StockData> data = getStockData(ticker, startdate, enddate);
                System.out.println();
                System.out.println("Executing investment strategy");
@@ -99,10 +99,30 @@ class Assign2 {
       return false;
    }
 
-   static Deque<StockData> getStockData(String ticker, String start, String end) {	  
-	  // To Do: 
-	  // Execute the second query, which will return stock information of the ticker (descending on the transaction date)
-	  // Please don't forget to use a prepared statement	   
+   static Deque<StockData> getStockData(String ticker, String start, String end) throws SQLException{	  
+      // create and execute preparedStatement when a date range is given
+      if(start != null && end != null) {
+         PreparedStatement stockStatement = conn.prepareStatement(
+            "select * from priceVolume" +
+            " where Ticker = ? AND" +
+            " TransDate BETWEEN ? AND ?" +
+            " order by TransDate DESC"
+         );
+         stockStatement.setString(1, ticker);
+         stockStatement.setString(2, start);
+         stockStatement.setString(3, end);
+         ResultSet stockData = stockStatement.executeQuery();
+      }
+      // create and execute preparedStatement for no date range
+      else {
+         PreparedStatement stockStatement = conn.prepareStatement(
+            "select * from priceVolume" +
+            " where Ticker = ?" +
+            " order by TransDate DESC"
+         );
+         stockStatement.setString(1, ticker);
+         ResultSet stockData = stockStatement.executeQuery();
+      }
 
       Deque<StockData> result = new ArrayDeque<>();
 
