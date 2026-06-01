@@ -1,8 +1,9 @@
 /* 
-This is a Java skeleton code to help you out with how to start this assignment.
-Please remember that this is NOT a compilable/runnable java file.
-Please feel free to use this skeleton code.
-Please look closely at the "To Do" parts of this file. You may get an idea of how to finish this assignment. 
+Programmer: Cristobal Miranda
+This program is intended to connect to an SQL database containing millions of data points on several companies.
+You can input a ticker symbol and, optionally, a start/end date into the console.
+Your output to the console will contain every time that stock had a split and how much money you'd get by using a hard-coded
+investment strategy for the particular stock throughout the given duration or the entire timeframe.
 */
 
 import java.io.FileInputStream;
