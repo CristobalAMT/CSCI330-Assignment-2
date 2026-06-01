@@ -63,6 +63,7 @@ class Assign2Skeleton {
          }
 
          // Close the database connection
+         conn.close();
 
       } catch (SQLException ex) {
          System.out.printf("SQLException: %s%nSQLState: %s%nVendorError: %s%n",
