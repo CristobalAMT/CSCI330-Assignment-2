@@ -9,6 +9,8 @@ investment strategy for the particular stock throughout the given duration or th
 import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -82,10 +84,19 @@ class Assign2Skeleton {
    // if true, the main loop begins obtaining data for the company and executes the investment strategy.
    // if false, the main loop simply loops again.
    static boolean getName(String ticker) throws SQLException {
-	  // To Do: 
-	  // Execute the first query and print the company name of the ticker user provided (e.g., INTC to Intel Corp.) 
-	  // Please don't forget to use a prepared statement
-     return false;
+      // create preparedStatement 
+      PreparedStatement nameStatement = conn.prepareStatement(
+      "select Name from company where Ticker = ?");
+      nameStatement.setString(1, ticker);
+      ResultSet name = nameStatement.executeQuery(); // results from executing statement
+      // if we got a name, then print the company name corresponding to the given ticker and return true.
+      if(name.next()) {
+         System.out.print(name.getString(1));
+         return true;
+      }
+      // otherwise, say we didn't get a result and return false.
+      System.out.println("Ticker '" + ticker + "' not found in database.");
+      return false;
    }
 
    static Deque<StockData> getStockData(String ticker, String start, String end) {	  
