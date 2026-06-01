@@ -1,5 +1,3 @@
-import java.util.Properties;
-import java.util.Scanner;
 import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
+import java.util.Scanner;
 
 class Demo {
 
@@ -14,8 +14,8 @@ class Demo {
 
     public static void main(String[] args) throws Exception {
         // Get connection properties
-        //String paramsFile = "ConnectionParameters_LabComputer.txt";
-		String paramsFile = "ConnectionParameters_RemoteComputer.txt";
+        //String paramsFile = "connectionparams/ConnectionParameters_LabComputer.txt";
+		String paramsFile = "connectionparams/ConnectionParameters_RemoteComputer.txt";
         if (args.length >= 1) {
             paramsFile = args[0];
         }
