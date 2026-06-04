@@ -24,6 +24,13 @@ class Assign2 {
       double highPrice;
       double lowPrice;
       double closePrice;
+
+      // test method to ensure price adjustment worked
+      // prints out all five instance variables of StockData
+      void print() {
+         System.out.println(date + " - open: " + openPrice + " | high: " + highPrice + " | low: " + lowPrice + " | close: " + closePrice);
+      }
+
    }
    
    static Connection conn;
@@ -155,18 +162,18 @@ class Assign2 {
          String currDate = stockInfo.getString(2).trim();
          // in case of 2:1 stock split
          if(Math.abs((currClose/nextOpen) - 2) < 0.2) {
-            System.out.println("2:1 split on " + currDate + " " + currClose + " --> " + nextOpen);
             totalDivisor = totalDivisor*2;
+            System.out.println("2:1 split on " + currDate + " " + currClose + " --> " + nextOpen + " | totalDivisor: " + totalDivisor);
          }
          // in case of 3:1 stock split
          else if(Math.abs((currClose/nextOpen) - 3) < 0.3) {
-            System.out.println("3:1 split on " + currDate + " " + currClose + " --> " + nextOpen);
             totalDivisor = totalDivisor*3;
+            System.out.println("3:1 split on " + currDate + " " + currClose + " --> " + nextOpen + " | totalDivisor: " + totalDivisor);
          }
          // in case of 3:2 stock split
          else if(Math.abs((currClose/nextOpen) - 1.5) < 0.15) {
-            System.out.println("3:2 split on " + currDate + " " + currClose + " --> " + nextOpen);
             totalDivisor = totalDivisor*1.5;
+            System.out.println("3:2 split on " + currDate + " " + currClose + " --> " + nextOpen + " | totalDivisor: " + totalDivisor);
          }
          
          // add current stock data to deque
@@ -176,6 +183,7 @@ class Assign2 {
          currStock.highPrice = Double.parseDouble(stockInfo.getString(4).trim()) / totalDivisor;
          currStock.lowPrice = Double.parseDouble(stockInfo.getString(5).trim()) / totalDivisor;
          currStock.closePrice = currClose / totalDivisor;
+         // currStock.print();
          result.addLast(currStock);
       }
 	         
