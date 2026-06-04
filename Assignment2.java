@@ -111,6 +111,10 @@ class Assign2 {
       return false;
    }
 
+   // returns a deque object containing the stock data (trading date, opening price, high price, low price, and closing price)
+      // of every single trading day in a given time frame (if a time frame is given). 
+      // stock prices are adjusted for splits. The method also prints when splits occur to console.
+      // The deque is ordered from earliest trading day to the latest trading day.
    static Deque<StockData> getStockData(String ticker, String start, String end) throws SQLException{	  
       ResultSet stockInfo = null;
       // create and execute preparedStatement when a date range is given
@@ -158,7 +162,7 @@ class Assign2 {
          // check for stock splits 
 
          double currClose = Double.parseDouble(stockInfo.getString(6).trim());
-         double nextOpen = result.getLast().openPrice * totalDivisor;
+         double nextOpen = result.getFirst().openPrice * totalDivisor;
          String currDate = stockInfo.getString(2).trim();
          // in case of 2:1 stock split
          if(Math.abs((currClose/nextOpen) - 2) < 0.2) {
@@ -183,10 +187,10 @@ class Assign2 {
          currStock.highPrice = Double.parseDouble(stockInfo.getString(4).trim()) / totalDivisor;
          currStock.lowPrice = Double.parseDouble(stockInfo.getString(5).trim()) / totalDivisor;
          currStock.closePrice = currClose / totalDivisor;
-         // currStock.print();
-         result.addLast(currStock);
+         // currStock.print(); // for testing purposes
+         result.addFirst(currStock);
       }
-	         
+      
       return result;
    }
    
