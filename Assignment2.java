@@ -200,18 +200,20 @@ class Assign2 {
 	  // data (which is a Deque) has all the information (after the split adjustment) you need to apply these steps
 
      // deque for moving average of closing prices
-     Deque<Double> ma = new ArrayDeque<>();
+     Deque<Double> maDeque = new ArrayDeque<>();
      double maTotal = 0;
      for(StockData dayData : data) {
-      // add new closing price to ma. 
+      // add new closing price to maDeque. 
+      maDeque.addLast(maTotal);
+      maTotal += dayData.closePrice;
 
       // if adding sets it to over 50, pop first element and subtract from maTotal
-      if(ma.size() > 50) {
-
+      if(maDeque.size() > 50) {
+         maTotal -= maDeque.pop();
       }
       
-      if(ma.size() == 50) {
-
+      if(maDeque.size() == 50) {
+         double ma = maTotal / 50.0;
       }
      }
    }
