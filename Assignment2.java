@@ -254,8 +254,8 @@ class Assign2 {
          
          // 2.7
          // add new closing price to maDeque. 
-         maDeque.addLast(maTotal);
-         maTotal += dayData.closePrice;
+         maDeque.addLast(currClose);
+         maTotal += currClose;
 
          // if adding sets it to over 50, pop first element and subtract from maTotal
          if(maDeque.size() > 50) {
