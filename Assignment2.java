@@ -156,6 +156,8 @@ class Assign2 {
       firstStock.closePrice = Double.parseDouble(stockInfo.getString(6).trim());
       result.add(firstStock);
 
+      int numSplits = 0;
+
       // while there is more data, add stock to deque while adjusting for splits
       // step 2.4/2.5
       while(stockInfo.next()) {
@@ -168,16 +170,19 @@ class Assign2 {
          if(Math.abs((currClose/nextOpen) - 2) < 0.2) {
             totalDivisor = totalDivisor*2;
             System.out.println("2:1 split on " + currDate + " " + currClose + " --> " + nextOpen + " | totalDivisor: " + totalDivisor);
+            numSplits++;
          }
          // in case of 3:1 stock split
          else if(Math.abs((currClose/nextOpen) - 3) < 0.3) {
             totalDivisor = totalDivisor*3;
             System.out.println("3:1 split on " + currDate + " " + currClose + " --> " + nextOpen + " | totalDivisor: " + totalDivisor);
+            numSplits++;
          }
          // in case of 3:2 stock split
          else if(Math.abs((currClose/nextOpen) - 1.5) < 0.15) {
             totalDivisor = totalDivisor*1.5;
             System.out.println("3:2 split on " + currDate + " " + currClose + " --> " + nextOpen + " | totalDivisor: " + totalDivisor);
+            numSplits++;
          }
          
          // add current stock data to deque
@@ -190,6 +195,8 @@ class Assign2 {
          // currStock.print(); // for testing purposes
          result.addFirst(currStock);
       }
+
+      System.out.println(numSplits + " splits in " + result.size() + " trading days");
       
       return result;
    }
@@ -233,11 +240,11 @@ class Assign2 {
             // 2.9
             // Execute investment strategy
             // buy criteria
-            if(currClose < ma && (currClose / currOpen <= 0.97)) {
+            if(currClose < ma && (currClose / currOpen < 0.97000001)) {
                buy = true; // flip buy to true to buy at opening price on next day
             }
             // sell criteria
-            else if(currShares >= 100 && currOpen > ma && (currOpen / prevClose >= 1.01)) {
+            else if(currShares >= 100 && currOpen > ma && (currOpen / prevClose > 1.00999999)) {
                // sell by average price on that day
                currShares -= 100;
                currCash += (currOpen + currClose)/2 - 8.00; // include $8 transaction fee
