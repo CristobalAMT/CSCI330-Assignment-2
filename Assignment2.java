@@ -195,39 +195,75 @@ class Assign2 {
    }
    
    static void doStrategy(String ticker, Deque<StockData> data) {
-	  //To Do: 
-	  // Apply Steps 2.6 to 2.10 explained in the assignment description 
-	  // data (which is a Deque) has all the information (after the split adjustment) you need to apply these steps
-
-     // deque for moving average of closing prices
-     Deque<Double> maDeque = new ArrayDeque<>();
-     double maTotal = 0;
-     
-     double currentCash = 0;
-     double currentShares = 0;
-     boolean enoughData = false;
-     for(StockData dayData : data) {
-      // 2.7
-      // check for exactly 50 entries in maDeque BEFORE adjusting ma 
-      if(maDeque.size() == 50) {
-         double ma = maTotal / 50.0;
-         enoughData = true; // flip enoughData to true to show that we traded
-
+      //To Do: 
+      // Apply Steps 2.6 to 2.10 explained in the assignment description 
+      // data (which is a Deque) has all the information (after the split adjustment) you need to apply these steps
+      
+      // 2.8
+      // if less than 51 days of data, do no trading and report no gain
+      if(data.size() < 51) {
+         printResults(0, 0);
+         return;
       }
 
-      // add new closing price to maDeque. 
-      maDeque.addLast(maTotal);
-      maTotal += dayData.closePrice;
+      // deque for moving average of closing prices
+      Deque<Double> maDeque = new ArrayDeque<>();
+      double maTotal = 0;
 
-      // if adding sets it to over 50, pop first element and subtract from maTotal
-      if(maDeque.size() > 50) {
-         maTotal -= maDeque.pop();
+      // initialize variables used in for each loop
+      double currCash = 0;
+      double currShares = 0;
+      double prevClose = 0; // previous closing price, used for determining if we should sell on a given day
+      double currOpen = 0;
+      int transNum = 0; // transaction number
+      boolean buy = false;
+      for(StockData dayData : data) {
+         double currClose = dayData.closePrice;
+         currOpen = dayData.openPrice;
+         // if we need to buy today
+         if(buy) {
+            currShares += 100;
+            currCash -= (100*currOpen) - 8.00; // remove cash for buying shares, plus $8 transaction fee
+            transNum++;
+            buy = false;
+         }
+         // check for exactly 50 entries in maDeque (for trading) BEFORE adjusting ma 
+         if(maDeque.size() == 50) {
+            double ma = maTotal / 50.0;
+            // 2.9
+            // Execute investment strategy
+            // buy criteria
+            if(currClose < ma && (currClose / currOpen <= 0.97)) {
+               buy = true; // flip buy to true to buy at opening price on next day
+            }
+            // sell criteria
+            else if(currShares >= 100 && currOpen > ma && (currOpen / prevClose >= 1.01)) {
+               // sell by average price on that day
+               currShares -= 100;
+               currCash += (currOpen + currClose)/2 - 8.00; // include $8 transaction fee
+               transNum++;
+            }
+         }
+         
+         // 2.7
+         // add new closing price to maDeque. 
+         maDeque.addLast(maTotal);
+         maTotal += dayData.closePrice;
+
+         // if adding sets it to over 50, pop first element and subtract from maTotal
+         if(maDeque.size() > 50) {
+            maTotal -= maDeque.pop();
+         }
+         prevClose = currClose; // update previous closing price to today's closing price, for determining selling
       }
-     }
-     // 2.8 
-     // if there's less than 51 days of data, do no trading and print a gain of 0.
-     if(!enoughData) {
-
-     }
+      currCash += currOpen*currShares; // add remaining shares to currCash, ignoring transaction fee
+      currCash = Math.round(currCash * 100.0) / 100.0; // round cash to 2 decimal places
+      printResults(transNum, currCash); 
+   }
+   
+   // helper method for doStrategy. Simply prints out results for trading
+   static void printResults(int transNum, double netCash) {
+      System.out.println("Transactions executed: " + transNum);
+      System.out.println("Net cash: " + netCash + "\n");
    }
 }
