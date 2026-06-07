@@ -202,7 +202,19 @@ class Assign2 {
      // deque for moving average of closing prices
      Deque<Double> maDeque = new ArrayDeque<>();
      double maTotal = 0;
+     
+     double currentCash = 0;
+     double currentShares = 0;
+     boolean enoughData = false;
      for(StockData dayData : data) {
+      // 2.7
+      // check for exactly 50 entries in maDeque BEFORE adjusting ma 
+      if(maDeque.size() == 50) {
+         double ma = maTotal / 50.0;
+         enoughData = true; // flip enoughData to true to show that we traded
+
+      }
+
       // add new closing price to maDeque. 
       maDeque.addLast(maTotal);
       maTotal += dayData.closePrice;
@@ -211,10 +223,11 @@ class Assign2 {
       if(maDeque.size() > 50) {
          maTotal -= maDeque.pop();
       }
-      
-      if(maDeque.size() == 50) {
-         double ma = maTotal / 50.0;
-      }
+     }
+     // 2.8 
+     // if there's less than 51 days of data, do no trading and print a gain of 0.
+     if(!enoughData) {
+
      }
    }
 }
