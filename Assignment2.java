@@ -230,7 +230,7 @@ class Assign2 {
          // if we need to buy today
          if(buy) {
             currShares += 100;
-            currCash -= (100*currOpen) - 8.00; // remove cash for buying shares, plus $8 transaction fee
+            currCash -= (100*currOpen) + 8.00; // remove cash for buying shares, plus $8 transaction fee
             transNum++;
             buy = false;
          }
@@ -247,7 +247,7 @@ class Assign2 {
             else if(currShares >= 100 && currOpen > ma && (currOpen / prevClose > 1.00999999)) {
                // sell by average price on that day
                currShares -= 100;
-               currCash += (currOpen + currClose)/2 - 8.00; // include $8 transaction fee
+               currCash += (100*(currOpen + currClose)/2) - 8.00; // include $8 transaction fee
                transNum++;
             }
          }
