@@ -167,19 +167,19 @@ class Assign2 {
          // in case of 2:1 stock split
          if(Math.abs((currClose/nextOpen) - 2) < 0.2) {
             totalDivisor = totalDivisor*2;
-            System.out.println("2:1 split on " + currDate + " " + currClose + " --> " + nextOpen + " | totalDivisor: " + totalDivisor);
+            System.out.println("2:1 split on " + currDate + " " + currClose + " --> " + nextOpen);
             numSplits++;
          }
          // in case of 3:1 stock split
          else if(Math.abs((currClose/nextOpen) - 3) < 0.3) {
             totalDivisor = totalDivisor*3;
-            System.out.println("3:1 split on " + currDate + " " + currClose + " --> " + nextOpen + " | totalDivisor: " + totalDivisor);
+            System.out.println("3:1 split on " + currDate + " " + currClose + " --> " + nextOpen);
             numSplits++;
          }
          // in case of 3:2 stock split
          else if(Math.abs((currClose/nextOpen) - 1.5) < 0.15) {
             totalDivisor = totalDivisor*1.5;
-            System.out.println("3:2 split on " + currDate + " " + currClose + " --> " + nextOpen + " | totalDivisor: " + totalDivisor);
+            System.out.println("3:2 split on " + currDate + " " + currClose + " --> " + nextOpen);
             numSplits++;
          }
          
