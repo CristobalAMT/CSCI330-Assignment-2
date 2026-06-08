@@ -13,24 +13,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.lang.Math;
 
 class Assign2 {
    
+   // StockData is a class used for holding stock information. 
+   // Used in getStockData and doStrategy
    static class StockData {	   
-	   // To Do: 
-	   // Create this class which should contain the information  (date, open price, high price, low price, close price) for a particular ticker
-      String date;
+	   String date;
       double openPrice;
       double highPrice;
       double lowPrice;
       double closePrice;
-
-      // test method to ensure price adjustment worked
-      // prints out all five instance variables of StockData
-      void print() {
-         System.out.println(date + " - open: " + openPrice + " | high: " + highPrice + " | low: " + lowPrice + " | close: " + closePrice);
-      }
-
    }
    
    static Connection conn;
@@ -84,6 +78,7 @@ class Assign2 {
 
          // Close the database connection
          conn.close();
+         System.out.println("Database connection closed.");
 
       } catch (SQLException ex) {
          System.out.printf("SQLException: %s%nSQLState: %s%nVendorError: %s%n",
@@ -113,10 +108,12 @@ class Assign2 {
 
    // returns a deque object containing the stock data (trading date, opening price, high price, low price, and closing price)
       // of every single trading day in a given time frame (if a time frame is given). 
-      // stock prices are adjusted for splits. The method also prints when splits occur to console.
-      // The deque is ordered from earliest trading day to the latest trading day.
+   // stock prices are adjusted for splits. The method also prints when splits occur to console.
+   // The deque is ordered from earliest trading day to the latest trading day.
    static Deque<StockData> getStockData(String ticker, String start, String end) throws SQLException{	  
+      // initialize resultset
       ResultSet stockInfo = null;
+      // 2.3 
       // create and execute preparedStatement when a date range is given
       if(start != null && end != null) {
          PreparedStatement stockStatement = conn.prepareStatement(
@@ -148,6 +145,7 @@ class Assign2 {
       stockInfo.next();
 
       // Add first stock to deque
+      // This is so while loop doesn't need if statements for edge cases for getting data from the first entry
       StockData firstStock = new StockData();
       firstStock.date = stockInfo.getString(2).trim();
       firstStock.openPrice = Double.parseDouble(stockInfo.getString(3));
@@ -192,7 +190,6 @@ class Assign2 {
          currStock.highPrice = Double.parseDouble(stockInfo.getString(4).trim()) / totalDivisor;
          currStock.lowPrice = Double.parseDouble(stockInfo.getString(5).trim()) / totalDivisor;
          currStock.closePrice = currClose / totalDivisor;
-         // currStock.print(); // for testing purposes
          result.addFirst(currStock);
       }
 
@@ -201,6 +198,11 @@ class Assign2 {
       return result;
    }
    
+   // executes an investment strategy on the given data.
+   // the details of this strategy are in the assignment instructions.
+   // does no trading and quits early if given less than 51 days of data
+   // ticker is a String given in the main method, taken from console input.
+   // data deque is taken from getStockData
    static void doStrategy(String ticker, Deque<StockData> data) {
       //To Do: 
       // Apply Steps 2.6 to 2.10 explained in the assignment description 
@@ -224,6 +226,7 @@ class Assign2 {
       double currOpen = 0;
       int transNum = 0; // transaction number
       boolean buy = false;
+
       for(StockData dayData : data) {
          double currClose = dayData.closePrice;
          currOpen = dayData.openPrice;
@@ -234,7 +237,7 @@ class Assign2 {
             transNum++;
             buy = false;
          }
-         // check for exactly 50 entries in maDeque (for trading) BEFORE adjusting ma 
+         // check for exactly 50 entries in maDeque (for trading) BEFORE adjusting ma to keep ma accurate
          if(maDeque.size() == 50) {
             double ma = maTotal / 50.0;
             // 2.9
@@ -245,8 +248,8 @@ class Assign2 {
             }
             // sell criteria
             else if(currShares >= 100 && currOpen > ma && (currOpen / prevClose > 1.00999999)) {
-               // sell by average price on that day
                currShares -= 100;
+               // sell by average price on that day
                currCash += (100*(currOpen + currClose)/2) - 8.00; // include $8 transaction fee
                transNum++;
             }
@@ -257,14 +260,16 @@ class Assign2 {
          maDeque.addLast(currClose);
          maTotal += currClose;
 
-         // if adding sets it to over 50, pop first element and subtract from maTotal
+         // if adding sets it to over 50, pop first element and subtract from maTotal to keep size constant
          if(maDeque.size() > 50) {
             maTotal -= maDeque.pop();
          }
-         prevClose = currClose; // update previous closing price to today's closing price, for determining selling
+         prevClose = currClose; // update previous closing price to today's closing price, for sell determination
       }
+
       currCash += currOpen*currShares; // add remaining shares to currCash, ignoring transaction fee
       currCash = Math.round(currCash * 100.0) / 100.0; // round cash to 2 decimal places
+
       printResults(transNum, currCash); 
    }
    
